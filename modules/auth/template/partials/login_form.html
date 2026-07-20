@@ -1,0 +1,24 @@
+{% if error %}
+<div class="alert alert-error">{{ error }}</div>
+{% endif %}
+
+<form
+    hx-post="/auth/login"
+    hx-target="#auth-form-container"
+    hx-swap="innerHTML"
+    class="form"
+>
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" required autocomplete="email">
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" required autocomplete="current-password">
+
+    <button type="submit" class="btn">Login</button>
+</form>
+<p class="muted" style="margin-top: 0.75rem;"><a href="/auth/forgot-password">Forgot password?</a></p>
+
+{% if settings.google_oauth_enabled %}
+<div class="oauth-divider"><span>or</span></div>
+<a href="/auth/google/login" class="btn btn-google">Continue with Google</a>
+{% endif %}

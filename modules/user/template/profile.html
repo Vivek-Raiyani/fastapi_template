@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Profile — {{ settings.APP_NAME }}{% endblock %}
+
+{% block content %}
+<div class="profile-card">
+    <h1>Profile</h1>
+    <dl class="profile-details">
+        <dt>Email</dt>
+        <dd>{{ user.email }}</dd>
+        <dt>Name</dt>
+        <dd>{{ user.full_name or "—" }}</dd>
+        <dt>Member since</dt>
+        <dd>{{ user.created_at.strftime("%B %d, %Y") }}</dd>
+    </dl>
+
+    <form action="/auth/logout" method="post">
+        <button type="submit" class="btn btn-secondary">Logout</button>
+    </form>
+</div>
+{% endblock %}

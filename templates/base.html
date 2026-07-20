@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ settings.APP_NAME }}{% endblock %}</title>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <link rel="stylesheet" href="{{ settings.STATIC_URL }}css/app.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="brand">{{ settings.APP_NAME }}</a>
+        <div class="nav-links">
+            <a href="/auth/login">Login</a>
+            <a href="/auth/register">Register</a>
+            <a href="/users/profile">Profile</a>
+            <a href="/docs">API Docs</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <div id="toast" class="toast" aria-live="polite"></div>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

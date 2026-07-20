@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Home — {{ settings.APP_NAME }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>{{ settings.APP_NAME }}</h1>
+    <p class="subtitle">FastAPI template with Django-like defaults — auth, migrations, HTMX, and Jinja2.</p>
+
+    <div class="card-grid">
+        <div class="card">
+            <h2>JSON API</h2>
+            <p>REST endpoints under <code>/api/v1</code></p>
+            <a href="/docs" class="btn">Open Swagger</a>
+        </div>
+        <div class="card">
+            <h2>HTML + HTMX</h2>
+            <p>Server-rendered pages with partial updates</p>
+            <a href="/auth/login" class="btn btn-secondary">Login</a>
+        </div>
+        <div class="card">
+            <h2>CLI</h2>
+            <p>Django-style <code>manage.py</code> commands</p>
+            <pre>python manage.py migrate</pre>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,31 @@
+# This file defines a GitHub Actions workflow for Continuous Integration (CI).
+# Its purpose is to automatically run tests on every push or pull request to the main or master branches.
+# The workflow checks out the code, sets up Python, installs dependencies, applies migrations, and runs the test suite with coverage reporting.
+
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run migrations
+        run: python manage.py migrate
+
+      - name: Run tests
+        run: pytest tests/ -v --cov=. --cov-report=term-missing
+   
