@@ -28,4 +28,6 @@ class Role(Base, TimestampMixin):
     name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     description: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
-    permissions: Mapped[list[Permission]] = relationship(secondary=role_permissions, lazy="selectin")
+    permissions: Mapped[list[Permission]] = relationship(
+        secondary=role_permissions, lazy="selectin"
+    )

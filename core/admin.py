@@ -39,7 +39,14 @@ class AdminAuth(AuthenticationBackend):
 
 
 class UserAdmin(ModelView, model=User):
-    column_list = [User.id, User.email, User.full_name, User.is_active, User.is_superuser, User.is_verified]
+    column_list = [
+        User.id,
+        User.email,
+        User.full_name,
+        User.is_active,
+        User.is_superuser,
+        User.is_verified,
+    ]
     column_searchable_list = [User.email, User.full_name]
     form_excluded_columns = [User.hashed_password]
 
@@ -53,11 +60,25 @@ class PermissionAdmin(ModelView, model=Permission):
 
 
 class PaymentAdmin(ModelView, model=Payment):
-    column_list = [Payment.id, Payment.user_id, Payment.amount, Payment.currency, Payment.provider, Payment.status]
+    column_list = [
+        Payment.id,
+        Payment.user_id,
+        Payment.amount,
+        Payment.currency,
+        Payment.provider,
+        Payment.status,
+    ]
 
 
 class AuditLogAdmin(ModelView, model=AuditLog):
-    column_list = [AuditLog.id, AuditLog.action, AuditLog.model, AuditLog.object_id, AuditLog.user_id, AuditLog.created_at]
+    column_list = [
+        AuditLog.id,
+        AuditLog.action,
+        AuditLog.model,
+        AuditLog.object_id,
+        AuditLog.user_id,
+        AuditLog.created_at,
+    ]
     can_create = False
     can_edit = False
     can_delete = False
@@ -66,7 +87,12 @@ class AuditLogAdmin(ModelView, model=AuditLog):
 def setup_admin(app) -> Admin | None:
     if not settings.ADMIN_ENABLED:
         return None
-    admin = Admin(app, engine, authentication_backend=AdminAuth(secret_key=settings.SECRET_KEY), base_url=settings.ADMIN_PATH)
+    admin = Admin(
+        app,
+        engine,
+        authentication_backend=AdminAuth(secret_key=settings.SECRET_KEY),
+        base_url=settings.ADMIN_PATH,
+    )
     admin.add_view(UserAdmin)
     admin.add_view(RoleAdmin)
     admin.add_view(PermissionAdmin)

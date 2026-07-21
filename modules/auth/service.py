@@ -41,7 +41,9 @@ class AuthService:
             await self.send_verification_email(user)
         else:
             user.is_verified = True
-        await log_audit(self.db, action="register", model="User", object_id=user.id, user_id=user.id)
+        await log_audit(
+            self.db, action="register", model="User", object_id=user.id, user_id=user.id
+        )
         return user
 
     async def login(self, data: LoginRequest) -> TokenResponse:
@@ -94,7 +96,9 @@ class AuthService:
             raise AppError("User not found", status_code=404)
         user.is_verified = True
         await self.token_repo.mark_used(auth_token)
-        await log_audit(self.db, action="verify_email", model="User", object_id=user.id, user_id=user.id)
+        await log_audit(
+            self.db, action="verify_email", model="User", object_id=user.id, user_id=user.id
+        )
         return user
 
     async def request_password_reset(self, email: str) -> None:
@@ -121,7 +125,9 @@ class AuthService:
         user.failed_login_attempts = 0
         user.locked_until = None
         await self.token_repo.mark_used(auth_token)
-        await log_audit(self.db, action="reset_password", model="User", object_id=user.id, user_id=user.id)
+        await log_audit(
+            self.db, action="reset_password", model="User", object_id=user.id, user_id=user.id
+        )
         return user
 
     async def google_login_or_register(

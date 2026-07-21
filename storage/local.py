@@ -18,7 +18,9 @@ class LocalStorage:
         path.parent.mkdir(parents=True, exist_ok=True)
         return path
 
-    async def save(self, key: str, data: bytes, content_type: str = "application/octet-stream") -> str:
+    async def save(
+        self, key: str, data: bytes, content_type: str = "application/octet-stream"
+    ) -> str:
         path = self._path(key)
         async with aiofiles.open(path, "wb") as f:
             await f.write(data)

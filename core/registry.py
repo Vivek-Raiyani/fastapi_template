@@ -2,7 +2,6 @@
 
 import importlib
 import logging
-from pathlib import Path
 
 from fastapi import APIRouter, FastAPI
 

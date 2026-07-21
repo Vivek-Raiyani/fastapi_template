@@ -11,7 +11,9 @@ class Payment(Base, TimestampMixin, SoftDeleteMixin):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    amount: Mapped[int] = mapped_column(Integer, nullable=False)  # smallest currency unit (paise/cents)
+    amount: Mapped[int] = mapped_column(
+        Integer, nullable=False
+    )  # smallest currency unit (paise/cents)
     currency: Mapped[str] = mapped_column(String(3), default="INR", nullable=False)
     provider: Mapped[str] = mapped_column(String(20), nullable=False)  # razorpay | stripe
     provider_order_id: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)

@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.dependencies import get_current_user, get_db
 from core.permissions import PermissionCodename, require_permission
-from core.settings import settings
 from database.models.user import User
 from modules.payments.schemas import (
     CreatePaymentRequest,

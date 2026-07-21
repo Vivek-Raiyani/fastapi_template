@@ -1,16 +1,12 @@
 """Generic async repository base for CRUD operations."""
 
-from typing import Generic, TypeVar
-
 from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.base import Base, utcnow
 
-ModelT = TypeVar("ModelT", bound=Base)
 
-
-class BaseRepository(Generic[ModelT]):
+class BaseRepository[ModelT: Base]:
     """Base data-access layer with optional soft-delete support."""
 
     model: type[ModelT]

@@ -21,7 +21,9 @@ class S3Storage:
             kwargs["endpoint_url"] = settings.S3_ENDPOINT_URL
         return kwargs
 
-    async def save(self, key: str, data: bytes, content_type: str = "application/octet-stream") -> str:
+    async def save(
+        self, key: str, data: bytes, content_type: str = "application/octet-stream"
+    ) -> str:
         async with self._session.client(
             "s3",
             aws_access_key_id=settings.S3_ACCESS_KEY_ID or None,

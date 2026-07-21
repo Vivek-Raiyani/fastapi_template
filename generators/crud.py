@@ -12,7 +12,6 @@ from generators.introspection import (
     load_model,
     render_field,
     response_fields,
-    to_class_name,
     update_fields,
 )
 from generators.permissions_registry import enum_member, enum_prefix, register_module_permissions
@@ -47,7 +46,9 @@ def generate_crud(
     written.append(str(schemas_path.relative_to(ROOT)))
 
     repository_path = module_dir / "repository.py"
-    existing_repo = repository_path.read_text(encoding="utf-8") if repository_path.exists() else None
+    existing_repo = (
+        repository_path.read_text(encoding="utf-8") if repository_path.exists() else None
+    )
     write_file(
         repository_path,
         merge_generated_content(
@@ -78,8 +79,12 @@ def generate_crud(
         router_path,
         merge_generated_content(
             existing_router,
-            header=_router_header(meta, with_filters=with_filters, with_permissions=with_permissions),
-            body=_render_router_body(meta, with_filters=with_filters, with_permissions=with_permissions),
+            header=_router_header(
+                meta, with_filters=with_filters, with_permissions=with_permissions
+            ),
+            body=_render_router_body(
+                meta, with_filters=with_filters, with_permissions=with_permissions
+            ),
             footer="# Add custom routes below.",
         ),
     )
@@ -192,13 +197,15 @@ def _render_repository_body(meta: ModelMeta, *, with_filters: bool) -> str:
         searchable = [col for col in meta.columns if col.searchable]
         for col in searchable:
             model_attr = f"{class_name}.{col.name}"
-            lines.append(f"            clauses.append({model_attr}.ilike(f\"%{{filters.search}}%\"))")
+            lines.append(f'            clauses.append({model_attr}.ilike(f"%{{filters.search}}%"))')
         if searchable:
             lines.append("            stmt = stmt.where(or_(*clauses))")
         for col in filter_fields(meta):
             if col.pydantic_type == "bool":
                 lines.append(f"        if filters.{col.name} is not None:")
-                lines.append(f"            stmt = stmt.where({class_name}.{col.name} == filters.{col.name})")
+                lines.append(
+                    f"            stmt = stmt.where({class_name}.{col.name} == filters.{col.name})"
+                )
             elif col.pydantic_type in {"datetime", "date"}:
                 lines.append(f"        if filters.{col.name}_after is not None:")
                 lines.append(
@@ -210,15 +217,17 @@ def _render_repository_body(meta: ModelMeta, *, with_filters: bool) -> str:
                 )
             else:
                 lines.append(f"        if filters.{col.name} is not None:")
-                lines.append(f"            stmt = stmt.where({class_name}.{col.name} == filters.{col.name})")
+                lines.append(
+                    f"            stmt = stmt.where({class_name}.{col.name} == filters.{col.name})"
+                )
         sort_default = default_sort_field(meta)
         lines.extend(
             [
-                f"        sort_field = filters.sort or \"{sort_default}\"",
+                f'        sort_field = filters.sort or "{sort_default}"',
                 "        sort_column = getattr(self.model, sort_field, None)",
                 "        if sort_column is not None:",
                 "            stmt = stmt.order_by(",
-                "                sort_column.asc() if filters.order == \"asc\" else sort_column.desc()",
+                '                sort_column.asc() if filters.order == "asc" else sort_column.desc()',
                 "            )",
                 "        return stmt",
                 "",
@@ -271,10 +280,10 @@ def _render_service_body(meta: ModelMeta, *, with_filters: bool) -> str:
         f"    async def get(self, item_id: int) -> {class_name}Response:",
         "        item = await self.repo.get_by_id(item_id)",
         "        if item is None:",
-        "            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=\"Not found\")",
+        '            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")',
         f"        return {class_name}Response.model_validate(item)",
         "",
-        f"    async def list(self, params: PageParams",
+        "    async def list(self, params: PageParams",
     ]
     if with_filters:
         lines[-1] += f", filters: {class_name}Filter"
@@ -308,7 +317,7 @@ def _render_service_body(meta: ModelMeta, *, with_filters: bool) -> str:
             f"    async def update(self, item_id: int, data: {class_name}Update) -> {class_name}Response:",
             "        item = await self.repo.get_by_id(item_id)",
             "        if item is None:",
-            "            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=\"Not found\")",
+            '            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")',
             f"        item = await self.repo.update(item, {update_data})",
             "        await self.db.commit()",
             f"        return {class_name}Response.model_validate(item)",
@@ -316,7 +325,7 @@ def _render_service_body(meta: ModelMeta, *, with_filters: bool) -> str:
             "    async def delete(self, item_id: int) -> None:",
             "        item = await self.repo.get_by_id(item_id)",
             "        if item is None:",
-            "            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=\"Not found\")",
+            '            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")',
             "        await self.repo.delete(item)",
             "        await self.db.commit()",
         ]
@@ -361,13 +370,21 @@ def _auth_dep(permission: str, with_permissions: bool) -> str:
 
 def _render_router_body(meta: ModelMeta, *, with_filters: bool, with_permissions: bool) -> str:
     class_name = meta.class_name
-    read_dep = _auth_dep(f"PermissionCodename.{enum_member(meta.module_name, 'READ')}.value", with_permissions)
-    create_dep = _auth_dep(f"PermissionCodename.{enum_member(meta.module_name, 'CREATE')}.value", with_permissions)
-    update_dep = _auth_dep(f"PermissionCodename.{enum_member(meta.module_name, 'UPDATE')}.value", with_permissions)
-    delete_dep = _auth_dep(f"PermissionCodename.{enum_member(meta.module_name, 'DELETE')}.value", with_permissions)
+    read_dep = _auth_dep(
+        f"PermissionCodename.{enum_member(meta.module_name, 'READ')}.value", with_permissions
+    )
+    create_dep = _auth_dep(
+        f"PermissionCodename.{enum_member(meta.module_name, 'CREATE')}.value", with_permissions
+    )
+    update_dep = _auth_dep(
+        f"PermissionCodename.{enum_member(meta.module_name, 'UPDATE')}.value", with_permissions
+    )
+    delete_dep = _auth_dep(
+        f"PermissionCodename.{enum_member(meta.module_name, 'DELETE')}.value", with_permissions
+    )
 
     list_sig = [
-        "@router.get(\"\", response_model=Page[" + f"{class_name}Response])",
+        '@router.get("", response_model=Page[' + f"{class_name}Response])",
         "async def list_items(",
         "    params: PageParams = Depends(),",
     ]
@@ -390,7 +407,7 @@ def _render_router_body(meta: ModelMeta, *, with_filters: bool, with_permissions
         [
             *list_sig,
             "",
-            f"@router.post(\"\", response_model={class_name}Response, status_code=status.HTTP_201_CREATED)",
+            f'@router.post("", response_model={class_name}Response, status_code=status.HTTP_201_CREATED)',
             "async def create_item(",
             f"    data: {class_name}Create,",
             "    db: AsyncSession = Depends(get_db),",
@@ -399,7 +416,7 @@ def _render_router_body(meta: ModelMeta, *, with_filters: bool, with_permissions
             f"    service = {class_name}Service(db)",
             "    return await service.create(data)",
             "",
-            f"@router.get(\"/{{item_id}}\", response_model={class_name}Response)",
+            f'@router.get("/{{item_id}}", response_model={class_name}Response)',
             "async def get_item(",
             "    item_id: int,",
             "    db: AsyncSession = Depends(get_db),",
@@ -408,7 +425,7 @@ def _render_router_body(meta: ModelMeta, *, with_filters: bool, with_permissions
             f"    service = {class_name}Service(db)",
             "    return await service.get(item_id)",
             "",
-            f"@router.patch(\"/{{item_id}}\", response_model={class_name}Response)",
+            f'@router.patch("/{{item_id}}", response_model={class_name}Response)',
             "async def update_item(",
             "    item_id: int,",
             f"    data: {class_name}Update,",
@@ -418,7 +435,7 @@ def _render_router_body(meta: ModelMeta, *, with_filters: bool, with_permissions
             f"    service = {class_name}Service(db)",
             "    return await service.update(item_id, data)",
             "",
-            "@router.delete(\"/{item_id}\", status_code=status.HTTP_204_NO_CONTENT)",
+            '@router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)',
             "async def delete_item(",
             "    item_id: int,",
             "    db: AsyncSession = Depends(get_db),",
@@ -454,7 +471,7 @@ def _render_filters(meta: ModelMeta) -> str:
             "from core.filters import BaseFilter",
             "",
             f"class {class_name}Filter(BaseFilter):",
-            f"    sort: str | None = Field(default=None, description=\"Sort field (default: {default_sort_field(meta)})\")",
+            f'    sort: str | None = Field(default=None, description="Sort field (default: {default_sort_field(meta)})")',
         ]
     )
     for col in filter_fields(meta):
@@ -481,7 +498,6 @@ def _render_permissions(meta: ModelMeta) -> str:
 
 
 def _render_tests(meta: ModelMeta, *, with_permissions: bool) -> str:
-    class_name = meta.class_name
     route = meta.route_prefix
     api_prefix = "/api/v1"
     create_cols = create_fields(meta)
@@ -520,11 +536,11 @@ def _render_tests(meta: ModelMeta, *, with_permissions: bool) -> str:
         f"async def _auth_headers(client):\n"
         f'    email = _email("{meta.module_name}")\n'
         f'    password = "testpass123"\n'
-        f'    await client.post(\n'
+        f"    await client.post(\n"
         f'        "{api_prefix}/auth/register",\n'
         f'        json={{"email": email, "password": password}},\n'
         f"    )\n"
-        f'    login = await client.post(\n'
+        f"    login = await client.post(\n"
         f'        "{api_prefix}/auth/login",\n'
         f'        json={{"email": email, "password": password}},\n'
         f"    )\n"
@@ -544,7 +560,7 @@ def _render_tests(meta: ModelMeta, *, with_permissions: bool) -> str:
         f"    item = create.json()\n"
         f'    assert "id" in item\n\n'
         f"    get_one = await client.get(\n"
-        f'        f\"{api_prefix}{route}/{{item[\'id\']}}\",\n'
+        f"        f\"{api_prefix}{route}/{{item['id']}}\",\n"
         f"        headers=headers,\n"
         f"    )\n"
         f"    assert get_one.status_code == 200\n\n"
@@ -555,13 +571,13 @@ def _render_tests(meta: ModelMeta, *, with_permissions: bool) -> str:
         f"    assert listed.status_code == 200\n"
         f'    assert listed.json()["total"] >= 1\n\n'
         f"    updated = await client.patch(\n"
-        f'        f\"{api_prefix}{route}/{{item[\'id\']}}\",\n'
+        f"        f\"{api_prefix}{route}/{{item['id']}}\",\n"
         f"        headers=headers,\n"
         f"        json={update_payload},\n"
         f"    )\n"
         f"    assert updated.status_code == 200\n\n"
         f"    deleted = await client.delete(\n"
-        f'        f\"{api_prefix}{route}/{{item[\'id\']}}\",\n'
+        f"        f\"{api_prefix}{route}/{{item['id']}}\",\n"
         f"        headers=headers,\n"
         f"    )\n"
         f"    assert deleted.status_code == 204\n"
@@ -597,7 +613,9 @@ def _ensure_model_registered(meta: ModelMeta) -> None:
     env_text = env_path.read_text(encoding="utf-8")
     env_import = f"    {meta.module_name},"
     if env_import not in env_text:
-        marker = "from database.models import (  # noqa: F401 — register all models for autogenerate"
+        marker = (
+            "from database.models import (  # noqa: F401 — register all models for autogenerate"
+        )
         if marker in env_text:
             env_text = env_text.replace(
                 marker,

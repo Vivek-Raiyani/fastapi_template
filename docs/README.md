@@ -7,6 +7,8 @@ A Django-inspired FastAPI starter with batteries included: auth, migrations, HTM
 ```bash
 copy .env.example .env          # Windows
 pip install -r requirements.txt
+pip install -r requirements-dev.txt   # optional: lint/format hooks
+pre-commit install                    # optional: run checks on git commit
 python manage.py migrate
 python manage.py runserver
 ```
@@ -33,7 +35,7 @@ python manage.py runserver
 | 10 | Docker Compose (Postgres, MinIO, Redis) | [phase-10-docker-compose.md](./phase-10-docker-compose.md) |
 | 11 | Payments (Razorpay + Stripe) | [phase-11-payments.md](./phase-11-payments.md) |
 | 12 | Email, password reset, verification | [phase-12-email-auth.md](./phase-12-email-auth.md) |
-| 13 | Platform (RBAC, rate limit, admin, tests, CI) | [phase-13-platform.md](./phase-13-platform.md) |
+| 13 | Platform (RBAC, rate limit, admin, tests, CI, lint) | [phase-13-platform.md](./phase-13-platform.md) |
 | 14 | CRUD generator (`create-module`, `generate-crud`) | [phase-14-crud-generator.md](./phase-14-crud-generator.md) |
 
 ---

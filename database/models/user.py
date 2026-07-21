@@ -23,7 +23,9 @@ class User(Base, TimestampMixin, SoftDeleteMixin):
     google_id: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True)
 
     # RBAC
-    role_id: Mapped[int | None] = mapped_column(ForeignKey("roles.id", ondelete="SET NULL"), nullable=True)
+    role_id: Mapped[int | None] = mapped_column(
+        ForeignKey("roles.id", ondelete="SET NULL"), nullable=True
+    )
 
     # Account lockout
     failed_login_attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)

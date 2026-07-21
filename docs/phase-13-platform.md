@@ -19,6 +19,7 @@
 | **Seed command** | `python manage.py seed` |
 | **Collectstatic** | `python manage.py collectstatic` |
 | **Tests** | `tests/` — pytest + httpx |
+| **Lint & format** | Ruff + pre-commit — see below |
 | **Dockerfile** | Production container image |
 | **CI/CD** | `.github/workflows/ci.yml` |
 
@@ -50,9 +51,34 @@ Details and review checklist: [Phase 14 — CRUD Generator](./phase-14-crud-gene
 1. Login as superuser via `/auth/login`
 2. Visit `/admin`
 
-## Skipped (per request)
+## Lint, format & pre-commit
 
-- Pre-commit / lint / format config
+| File | Purpose |
+|------|---------|
+| `pyproject.toml` | Ruff lint + format rules |
+| `.pre-commit-config.yaml` | Git hooks (runs on every commit) |
+| `requirements-dev.txt` | Dev tools: `ruff`, `pre-commit` |
+
+**Setup (once per machine):**
+
+```bash
+pip install -r requirements-dev.txt
+pre-commit install
+```
+
+**Run manually:**
+
+```bash
+ruff check .              # lint
+ruff check . --fix        # lint + auto-fix
+ruff format .             # format
+pre-commit run --all-files
+```
+
+Pre-commit runs trailing-whitespace, YAML checks, Ruff lint (with fix), and Ruff format before each commit. CI runs the same Ruff checks on every push/PR.
+
+## Skipped (for now)
+
 - i18n / localization
 
 ## Status

@@ -20,7 +20,10 @@ from core.settings import settings
 from core.templating import template_response
 from middlewares import CSRFMiddleware, RequestLoggingMiddleware
 
-limiter = Limiter(key_func=get_remote_address, default_limits=[settings.RATE_LIMIT_DEFAULT] if settings.RATE_LIMIT_ENABLED else [])
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=[settings.RATE_LIMIT_DEFAULT] if settings.RATE_LIMIT_ENABLED else [],
+)
 
 
 @asynccontextmanager
@@ -69,6 +72,7 @@ def create_app() -> FastAPI:
     setup_admin(app)
 
     if settings.SERVE_HTML:
+
         @app.get("/")
         async def home(request: Request):
             return template_response(request, "index.html")

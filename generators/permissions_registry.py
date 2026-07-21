@@ -89,7 +89,7 @@ def _parse_enum_permissions(content: str) -> dict[str, dict[str, str]]:
         match = re.match(r'\s+([A-Z0-9_]+)\s*=\s*"([^"]+)"', line)
         if not match:
             continue
-        member, value = match.groups()
+        _member, value = match.groups()
         if "." not in value:
             continue
         module_name, action = value.rsplit(".", 1)

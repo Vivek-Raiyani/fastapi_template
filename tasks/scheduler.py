@@ -21,7 +21,9 @@ def get_scheduler() -> AsyncIOScheduler:
 
 
 def register_jobs(scheduler: AsyncIOScheduler) -> None:
-    scheduler.add_job(heartbeat, "interval", minutes=settings.TASK_HEARTBEAT_MINUTES, id="heartbeat")
+    scheduler.add_job(
+        heartbeat, "interval", minutes=settings.TASK_HEARTBEAT_MINUTES, id="heartbeat"
+    )
     scheduler.add_job(
         cleanup_inactive_users,
         "cron",
@@ -48,7 +50,6 @@ def stop_scheduler() -> None:
 
 
 def run_forever() -> None:
-    import asyncio
 
     logging.basicConfig(level=logging.INFO)
 

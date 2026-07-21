@@ -1,7 +1,5 @@
 """Payment business logic."""
 
-import json
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.audit import log_audit
@@ -34,7 +32,9 @@ class PaymentService:
             receipt=f"payment_{payment.id}",
             notes={"payment_id": str(payment.id), "description": data.description or ""},
         )
-        await self.repo.update_status(payment, status="pending", provider_order_id=order["order_id"])
+        await self.repo.update_status(
+            payment, status="pending", provider_order_id=order["order_id"]
+        )
         await log_audit(
             self.db,
             action="create",
@@ -66,7 +66,9 @@ class PaymentService:
             status=result["status"],
             provider_payment_id=result["payment_id"],
         )
-        await log_audit(self.db, action="paid", model="Payment", object_id=payment.id, user_id=user.id)
+        await log_audit(
+            self.db, action="paid", model="Payment", object_id=payment.id, user_id=user.id
+        )
         return payment
 
     async def verify_stripe(self, user: User, *, payment_id: int, session_id: str) -> Payment:
@@ -80,7 +82,9 @@ class PaymentService:
             status="paid",
             provider_payment_id=str(result.get("payment_id")),
         )
-        await log_audit(self.db, action="paid", model="Payment", object_id=payment.id, user_id=user.id)
+        await log_audit(
+            self.db, action="paid", model="Payment", object_id=payment.id, user_id=user.id
+        )
         return payment
 
     async def handle_webhook(self, provider: str, body: bytes, signature: str) -> None:

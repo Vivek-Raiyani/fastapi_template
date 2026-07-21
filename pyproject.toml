@@ -1,0 +1,53 @@
+[project]
+name = "fastapi-template"
+version = "0.1.0"
+description = "Django-inspired FastAPI starter template"
+requires-python = ">=3.12"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["."]
+exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "alembic/versions",
+    "static_collected",
+    "media",
+    "pytest-cache-files-*",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # Pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+    "RUF", # Ruff-specific rules
+]
+ignore = [
+    "B008",  # Depends() in FastAPI route defaults is intentional
+    "RUF012", # Mutable class attributes on SQLAlchemy models
+]
+
+[tool.ruff.lint.per-file-ignores]
+"generators/crud.py" = ["E501"]  # code-generation strings are intentionally long
+
+[tool.ruff.lint.isort]
+known-first-party = ["core", "database", "generators", "middlewares", "modules", "payments", "storage", "tasks"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]

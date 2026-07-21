@@ -6,9 +6,9 @@ import importlib
 import inspect
 import re
 from dataclasses import dataclass
-from typing import Any
 
-from sqlalchemy import Boolean, Date, DateTime, Float, Integer, Numeric, String, Text, inspect as sa_inspect
+from sqlalchemy import Boolean, Date, DateTime, Float, Integer, Numeric, String, Text
+from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.orm import DeclarativeBase
 
 from database.base import Base
@@ -166,7 +166,9 @@ def create_fields(meta: ModelMeta) -> list[ColumnMeta]:
 
 
 def update_fields(meta: ModelMeta) -> list[ColumnMeta]:
-    return [col for col in meta.columns if not col.primary_key and col.name not in AUTO_MANAGED_COLUMNS]
+    return [
+        col for col in meta.columns if not col.primary_key and col.name not in AUTO_MANAGED_COLUMNS
+    ]
 
 
 def response_fields(meta: ModelMeta) -> list[ColumnMeta]:

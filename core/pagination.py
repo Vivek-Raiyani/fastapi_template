@@ -1,12 +1,8 @@
 """Pagination helpers."""
 
-from typing import Generic, TypeVar
-
 from pydantic import BaseModel, Field
 from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-T = TypeVar("T")
 
 
 class PageParams(BaseModel):
@@ -18,7 +14,7 @@ class PageParams(BaseModel):
         return (self.page - 1) * self.page_size
 
 
-class Page(BaseModel, Generic[T]):
+class Page[T](BaseModel):
     items: list[T]
     total: int
     page: int
@@ -41,6 +37,6 @@ async def paginate(
     return items, total
 
 
-def build_page(items: list[T], total: int, params: PageParams) -> Page[T]:
+def build_page[T](items: list[T], total: int, params: PageParams) -> Page[T]:
     pages = max(1, (total + params.page_size - 1) // params.page_size)
     return Page(items=items, total=total, page=params.page, page_size=params.page_size, pages=pages)

@@ -9,8 +9,9 @@ import sys
 from pathlib import Path
 
 import typer
-from alembic import command
 from alembic.config import Config
+
+from alembic import command
 
 ROOT = Path(__file__).resolve().parent
 app = typer.Typer(help="FastAPI template management commands.")
@@ -83,7 +84,6 @@ def createsuperuser():
 
 
 async def _createsuperuser():
-    from sqlalchemy.ext.asyncio import AsyncSession
 
     from core.security import hash_password
     from database.db import async_session_factory
@@ -156,7 +156,15 @@ def runworker(
             raise typer.Exit(1)
         typer.echo("Starting Celery Beat...")
         subprocess.run(
-            [sys.executable, "-m", "celery", "-A", "tasks.celery_app.celery_app", "beat", "--loglevel=info"],
+            [
+                sys.executable,
+                "-m",
+                "celery",
+                "-A",
+                "tasks.celery_app.celery_app",
+                "beat",
+                "--loglevel=info",
+            ],
             cwd=str(ROOT),
         )
         return
@@ -168,7 +176,15 @@ def runworker(
         run_forever()
     elif chosen == "celery":
         subprocess.run(
-            [sys.executable, "-m", "celery", "-A", "tasks.celery_app.celery_app", "worker", "--loglevel=info"],
+            [
+                sys.executable,
+                "-m",
+                "celery",
+                "-A",
+                "tasks.celery_app.celery_app",
+                "worker",
+                "--loglevel=info",
+            ],
             cwd=str(ROOT),
         )
     elif chosen == "arq":
@@ -220,8 +236,8 @@ def backupdb():
 
 
 async def _backupdb():
-    from database.db import async_session_factory
     from database.backup import backup as run_backup
+    from database.db import async_session_factory
 
     async with async_session_factory() as session:
         await run_backup(session)
@@ -299,8 +315,7 @@ def _createmodule(name: str) -> None:
             f"        self.repo = {class_name}Repository(db)\n"
         ),
         "schemas.py": (
-            f'"""Pydantic schemas for the {name} module."""\n\n'
-            f"from pydantic import BaseModel\n"
+            f'"""Pydantic schemas for the {name} module."""\n\nfrom pydantic import BaseModel\n'
         ),
         "repository.py": (
             f'"""Data access for the {name} module."""\n\n'
@@ -323,7 +338,9 @@ def _createmodule(name: str) -> None:
 def generatecrud(
     name: str = typer.Argument(..., help="Module name (snake_case), e.g. blog"),
     filters: bool = typer.Option(False, "--filters", help="Generate filters.py and list filtering"),
-    permissions: bool = typer.Option(False, "--permissions", help="Generate permissions.py and protect routes"),
+    permissions: bool = typer.Option(
+        False, "--permissions", help="Generate permissions.py and protect routes"
+    ),
     tests: bool = typer.Option(False, "--tests", help="Generate CRUD tests in tests/"),
 ):
     """Generate CRUD code from a SQLAlchemy model in database/models/."""

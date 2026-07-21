@@ -11,7 +11,9 @@ from core.templating import templates
 logger = logging.getLogger(__name__)
 
 
-async def send_email(*, to: str, subject: str, html_body: str, text_body: str | None = None) -> None:
+async def send_email(
+    *, to: str, subject: str, html_body: str, text_body: str | None = None
+) -> None:
     if settings.EMAIL_BACKEND == "console":
         logger.info("--- EMAIL to=%s subject=%s ---\n%s", to, subject, html_body)
         return
