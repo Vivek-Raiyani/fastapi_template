@@ -75,11 +75,28 @@ Drivers: `aiosqlite` (SQLite), `asyncpg` (PostgreSQL).
 
 ## Adding a new model
 
+### Manual workflow
+
 1. Create `database/models/my_model.py`
 2. Import it in `database/models/__init__.py`
 3. Import in `alembic/env.py` (so autogenerate sees it)
 4. Run `python manage.py makemigrations -m "add my_model"`
 5. Run `python manage.py migrate`
+
+### CRUD generator workflow (recommended for REST modules)
+
+For standard CRUD APIs, use the generator instead of writing boilerplate by hand:
+
+```bash
+python manage.py create-module blog
+# edit database/models/blog.py
+python manage.py generate-crud blog --filters --permissions --tests
+python manage.py makemigrations -m "add blog"
+python manage.py migrate
+python manage.py seed-data   # when using --permissions
+```
+
+See [Phase 14 — CRUD Generator](./phase-14-crud-generator.md) for the full workflow and review checklist.
 
 ## Status
 

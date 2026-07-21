@@ -19,6 +19,13 @@ class PermissionCodename(str, Enum):
     PAYMENTS_CREATE = "payments.create"
     ADMIN_ACCESS = "admin.access"
 
+    # --- BEGIN GENERATED PERMISSIONS ---
+    BLOG_CREATE = "blog.create"
+    BLOG_READ = "blog.read"
+    BLOG_UPDATE = "blog.update"
+    BLOG_DELETE = "blog.delete"
+    # --- END GENERATED PERMISSIONS ---
+
 
 async def get_user_permissions(db: AsyncSession, user: User) -> set[str]:
     if user.is_superuser:

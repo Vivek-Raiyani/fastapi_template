@@ -24,14 +24,26 @@
 
 ## RBAC
 
-Default roles (via `python manage.py seed`):
+Default roles (via `python manage.py seed-data`):
 
 | Role | Permissions |
 |------|-------------|
-| `user` | users.view, payments.view, payments.create |
+| `user` | users.view, payments.view, payments.create, plus generated module CRUD (see below) |
 | `admin` | All permissions |
 
 Superusers bypass all permission checks.
+
+### Generated module permissions
+
+When you run `python manage.py generate-crud {name} --permissions`, the generator:
+
+- Adds `{NAME}_CREATE`, `{NAME}_READ`, `{NAME}_UPDATE`, `{NAME}_DELETE` to `PermissionCodename` in `core/permissions.py`
+- Grants all four to the default `user` role in `database/seed.py` (inside generated marker blocks)
+- Protects generated routes with `require_permission()`
+
+Then run `python manage.py seed-data` to apply changes to the database.
+
+Details and review checklist: [Phase 14 — CRUD Generator](./phase-14-crud-generator.md).
 
 ## Admin panel
 
