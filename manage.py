@@ -266,6 +266,68 @@ async def _restoredb(backup_file: str):
     typer.echo(f"Database restored from {backup_file}.")
 
 
+@app.command("repair-migrations")
+def repair_migrations(
+    target: str = typer.Option(
+        "002",
+        "--target",
+        "-t",
+        help="Revision id to set when the current DB revision is missing from the repo",
+    ),
+):
+    """
+    Fix alembic_version when it references a revision that no longer exists.
+
+    Common after switching branches. Sets version to --target, then run migrate.
+    """
+    import sqlite3
+
+    from alembic.script import ScriptDirectory
+    from core.settings import settings
+
+    db_url = settings.DATABASE_URL
+    if not db_url.startswith("sqlite"):
+        typer.echo("repair-migrations currently supports sqlite only.", err=True)
+        raise typer.Exit(1)
+
+    db_path = db_url.split("///", 1)[-1]
+    db_file = Path(db_path)
+    if not db_file.is_absolute():
+        db_file = ROOT / db_file
+
+    if not db_file.exists():
+        typer.echo(f"No database at {db_file}. Run migrate to create one.")
+        raise typer.Exit(0)
+
+    script = ScriptDirectory.from_config(_alembic_config())
+    known = {rev.revision for rev in script.walk_revisions()}
+    if target not in known:
+        typer.echo(f"Unknown target revision '{target}'. Known: {', '.join(sorted(known))}", err=True)
+        raise typer.Exit(1)
+
+    conn = sqlite3.connect(db_file)
+    try:
+        row = conn.execute("SELECT version_num FROM alembic_version").fetchone()
+        if row is None:
+            conn.execute("INSERT INTO alembic_version (version_num) VALUES (?)", (target,))
+            typer.echo(f"Initialized alembic_version -> {target}")
+        else:
+            current = row[0]
+            if current in known:
+                typer.echo(f"alembic_version is already valid: {current}")
+            else:
+                conn.execute(
+                    "UPDATE alembic_version SET version_num = ?",
+                    (target,),
+                )
+                typer.echo(f"Repaired alembic_version: {current} -> {target}")
+        conn.commit()
+    finally:
+        conn.close()
+
+    typer.echo("Now run: python manage.py migrate")
+
+
 @app.command("create-module")
 def createmodule(
     name: str = typer.Argument(..., help="Name of the new module (snake_case)"),
