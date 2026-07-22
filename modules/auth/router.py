@@ -38,6 +38,7 @@ def _set_auth_cookie(response: RedirectResponse, token: str) -> RedirectResponse
 
 # --- JSON API ---
 
+
 @router.post("/register", response_model=dict, status_code=201)
 async def register(data: RegisterRequest, db: AsyncSession = Depends(get_db)):
     service = AuthService(db)
@@ -176,7 +177,10 @@ async def verify_email_page(token: str, db: AsyncSession = Depends(get_db)):
 @html_router.get("/reset-password")
 async def reset_password_page(request: Request, token: str):
     from middlewares.csrf import get_csrf_token
-    return template_response(request, "reset_password.html", {"token": token, "csrf_token": get_csrf_token(request)})
+
+    return template_response(
+        request, "reset_password.html", {"token": token, "csrf_token": get_csrf_token(request)}
+    )
 
 
 @html_router.post("/reset-password")
@@ -188,13 +192,16 @@ async def reset_password_form(
     db: AsyncSession = Depends(get_db),
 ):
     from middlewares.csrf import validate_csrf
+
     validate_csrf(request, csrf_token)
     service = AuthService(db)
     try:
         await service.reset_password(token, password)
         return RedirectResponse(url="/auth/login?message=Password+updated", status_code=303)
     except AppError as exc:
-        return template_response(request, "reset_password.html", {"token": token, "error": exc.message})
+        return template_response(
+            request, "reset_password.html", {"token": token, "error": exc.message}
+        )
 
 
 @html_router.get("/forgot-password")
@@ -222,10 +229,13 @@ async def logout():
 
 # --- Google OAuth ---
 
+
 @html_router.get("/google/login")
 async def google_login(request: Request):
     if not settings.google_oauth_enabled:
-        return RedirectResponse(url="/auth/login?error=Google+OAuth+is+not+configured", status_code=303)
+        return RedirectResponse(
+            url="/auth/login?error=Google+OAuth+is+not+configured", status_code=303
+        )
     redirect_uri = settings.GOOGLE_REDIRECT_URI
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
@@ -233,7 +243,9 @@ async def google_login(request: Request):
 @html_router.get("/google/callback")
 async def google_callback(request: Request, db: AsyncSession = Depends(get_db)):
     if not settings.google_oauth_enabled:
-        return RedirectResponse(url="/auth/login?error=Google+OAuth+is+not+configured", status_code=303)
+        return RedirectResponse(
+            url="/auth/login?error=Google+OAuth+is+not+configured", status_code=303
+        )
 
     try:
         token = await oauth.google.authorize_access_token(request)

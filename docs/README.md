@@ -7,6 +7,8 @@ A Django-inspired FastAPI starter with batteries included: auth, migrations, HTM
 ```bash
 copy .env.example .env          # Windows
 pip install -r requirements.txt
+pip install -r requirements-dev.txt   # optional: lint/format hooks
+pre-commit install                    # optional: run checks on git commit
 python manage.py migrate
 python manage.py runserver
 ```
@@ -33,7 +35,8 @@ python manage.py runserver
 | 10 | Docker Compose (Postgres, MinIO, Redis) | [phase-10-docker-compose.md](./phase-10-docker-compose.md) |
 | 11 | Payments (Razorpay + Stripe) | [phase-11-payments.md](./phase-11-payments.md) |
 | 12 | Email, password reset, verification | [phase-12-email-auth.md](./phase-12-email-auth.md) |
-| 13 | Platform (RBAC, rate limit, admin, tests, CI) | [phase-13-platform.md](./phase-13-platform.md) |
+| 13 | Platform (RBAC, rate limit, admin, tests, CI, lint) | [phase-13-platform.md](./phase-13-platform.md) |
+| 14 | CRUD generator (`create-module`, `generate-crud`) | [phase-14-crud-generator.md](./phase-14-crud-generator.md) |
 
 ---
 
@@ -49,10 +52,12 @@ python manage.py runserver
 │   ├── templating.py     # Jinja2 + HTMX helpers
 │   └── oauth/            # Google OAuth (Authlib)
 ├── database/             # SQLAlchemy base, session, models
+├── generators/           # CRUD code generation (introspection, writers)
 ├── modules/              # Feature modules (like Django apps)
 │   ├── auth/             # Register, login, OAuth
 │   ├── user/             # Profile, /me API
-│   └── storage/          # File upload API
+│   ├── storage/          # File upload API
+│   └── blog/             # Example generated CRUD module
 ├── storage/              # Storage backends (local, S3)
 ├── tasks/                # Background jobs (3 backends)
 ├── templates/            # Global Jinja2 templates
@@ -72,6 +77,7 @@ python manage.py runserver
 |--------|----------------|
 | `settings.py` | `core/settings.py` |
 | `manage.py` | `manage.py` |
+| `startapp` + manual CRUD | `create-module` + `generate-crud` |
 | `apps/` | `modules/` |
 | `models.py` | `database/models/` |
 | `migrations/` | `alembic/versions/` |

@@ -4,7 +4,9 @@ from typing import Protocol
 
 
 class StorageBackend(Protocol):
-    async def save(self, key: str, data: bytes, content_type: str = "application/octet-stream") -> str:
+    async def save(
+        self, key: str, data: bytes, content_type: str = "application/octet-stream"
+    ) -> str:
         """Save file and return its public or resolvable URL."""
         ...
 

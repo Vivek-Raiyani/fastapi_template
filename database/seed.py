@@ -6,7 +6,9 @@ from core.permissions import PermissionCodename
 from database.models.role import Permission, Role, role_permissions
 
 
-async def _link_permissions(session, role: Role, codenames: list[str], perm_map: dict[str, Permission]) -> None:
+async def _link_permissions(
+    session, role: Role, codenames: list[str], perm_map: dict[str, Permission]
+) -> None:
     for codename in codenames:
         await session.execute(
             role_permissions.insert().values(
@@ -20,10 +22,14 @@ async def seed(session) -> None:
     """Seed roles and permissions."""
     perm_map: dict[str, Permission] = {}
     for codename in PermissionCodename:
-        result = await session.execute(select(Permission).where(Permission.codename == codename.value))
+        result = await session.execute(
+            select(Permission).where(Permission.codename == codename.value)
+        )
         perm = result.scalar_one_or_none()
         if perm is None:
-            perm = Permission(codename=codename.value, description=codename.name.replace("_", " ").title())
+            perm = Permission(
+                codename=codename.value, description=codename.name.replace("_", " ").title()
+            )
             session.add(perm)
         perm_map[codename.value] = perm
     await session.flush()

@@ -19,28 +19,66 @@
 | **Seed command** | `python manage.py seed` |
 | **Collectstatic** | `python manage.py collectstatic` |
 | **Tests** | `tests/` — pytest + httpx |
+| **Lint & format** | Ruff + pre-commit — see below |
 | **Dockerfile** | Production container image |
 | **CI/CD** | `.github/workflows/ci.yml` |
 
 ## RBAC
 
-Default roles (via `python manage.py seed`):
+Default roles (via `python manage.py seed-data`):
 
 | Role | Permissions |
 |------|-------------|
-| `user` | users.view, payments.view, payments.create |
+| `user` | users.view, payments.view, payments.create, plus generated module CRUD (see below) |
 | `admin` | All permissions |
 
 Superusers bypass all permission checks.
+
+### Generated module permissions
+
+When you run `python manage.py generate-crud {name} --permissions`, the generator:
+
+- Adds `{NAME}_CREATE`, `{NAME}_READ`, `{NAME}_UPDATE`, `{NAME}_DELETE` to `PermissionCodename` in `core/permissions.py`
+- Grants all four to the default `user` role in `database/seed.py` (inside generated marker blocks)
+- Protects generated routes with `require_permission()`
+
+Then run `python manage.py seed-data` to apply changes to the database.
+
+Details and review checklist: [Phase 14 — CRUD Generator](./phase-14-crud-generator.md).
 
 ## Admin panel
 
 1. Login as superuser via `/auth/login`
 2. Visit `/admin`
 
-## Skipped (per request)
+## Lint, format & pre-commit
 
-- Pre-commit / lint / format config
+| File | Purpose |
+|------|---------|
+| `pyproject.toml` | Ruff lint + format rules |
+| `.pre-commit-config.yaml` | Git hooks (runs on every commit) |
+| `requirements-dev.txt` | Dev tools: `ruff`, `pre-commit` |
+
+**Setup (once per machine):**
+
+```bash
+pip install -r requirements-dev.txt
+pre-commit install
+```
+
+**Run manually:**
+
+```bash
+ruff check .              # lint
+ruff check . --fix        # lint + auto-fix
+ruff format .             # format
+pre-commit run --all-files
+```
+
+Pre-commit runs trailing-whitespace, YAML checks, Ruff lint (with fix), and Ruff format before each commit. CI runs the same Ruff checks on every push/PR.
+
+## Skipped (for now)
+
 - i18n / localization
 
 ## Status

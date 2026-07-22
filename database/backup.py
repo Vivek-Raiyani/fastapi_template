@@ -50,10 +50,10 @@ def _upload_to_s3(local_path: Path, remote_name: str) -> None:
 
 def _download_from_s3(remote_name: str) -> Path:
     s3_key = f"{S3_BACKUP_PREFIX}{remote_name}"
-    tmpfile = tempfile.NamedTemporaryFile(suffix=Path(remote_name).suffix, delete=False)
-    tmpfile.close()
-    _s3_client().download_file(settings.S3_BUCKET_NAME, s3_key, tmpfile.name)
-    return Path(tmpfile.name)
+    with tempfile.NamedTemporaryFile(suffix=Path(remote_name).suffix, delete=False) as tmpfile:
+        path = Path(tmpfile.name)
+    _s3_client().download_file(settings.S3_BUCKET_NAME, s3_key, str(path))
+    return path
 
 
 def _rotate_s3_backups() -> None:
@@ -62,9 +62,7 @@ def _rotate_s3_backups() -> None:
         Prefix=S3_BACKUP_PREFIX,
     )
     objects = [
-        obj
-        for obj in response.get("Contents", [])
-        if Path(obj["Key"]).name.startswith("backup_")
+        obj for obj in response.get("Contents", []) if Path(obj["Key"]).name.startswith("backup_")
     ]
     backups = sorted(objects, key=lambda obj: obj["LastModified"])
     while len(backups) > settings.MAX_BACKUPS:

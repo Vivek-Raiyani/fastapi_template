@@ -6,4 +6,4 @@ from database.models.payment import Payment
 from database.models.role import Permission, Role
 from database.models.user import User
 
-__all__ = ["User", "Role", "Permission", "AuthToken", "Payment", "AuditLog"]
+__all__ = ["AuditLog", "AuthToken", "Payment", "Permission", "Role", "User"]

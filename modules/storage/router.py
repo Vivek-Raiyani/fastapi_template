@@ -25,5 +25,7 @@ async def upload_file(
     data = await file.read()
     key = _safe_key(file.filename or "file", current_user.id)
     storage = get_storage()
-    url = await storage.save(key, data, content_type=file.content_type or "application/octet-stream")
+    url = await storage.save(
+        key, data, content_type=file.content_type or "application/octet-stream"
+    )
     return {"key": key, "url": url, "filename": file.filename}

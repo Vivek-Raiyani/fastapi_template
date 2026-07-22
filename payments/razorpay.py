@@ -16,7 +16,9 @@ class RazorpayBackend:
     def __init__(self):
         if not settings.razorpay_enabled:
             raise ValueError("Razorpay credentials not configured")
-        self._client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        self._client = razorpay.Client(
+            auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+        )
 
     async def create_order(
         self,

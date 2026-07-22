@@ -30,7 +30,9 @@ class StripeBackend:
                     "price_data": {
                         "currency": currency.lower(),
                         "unit_amount": amount,
-                        "product_data": {"name": notes.get("description", "Payment") if notes else "Payment"},
+                        "product_data": {
+                            "name": notes.get("description", "Payment") if notes else "Payment"
+                        },
                     },
                     "quantity": 1,
                 }
@@ -51,7 +53,11 @@ class StripeBackend:
     async def verify_payment(self, *, session_id: str) -> dict[str, Any]:
         session = stripe.checkout.Session.retrieve(session_id)
         if session.payment_status != "paid":
-            return {"provider": self.provider, "order_id": session_id, "status": session.payment_status}
+            return {
+                "provider": self.provider,
+                "order_id": session_id,
+                "status": session.payment_status,
+            }
         return {
             "provider": self.provider,
             "order_id": session_id,

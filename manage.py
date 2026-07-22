@@ -9,8 +9,9 @@ import sys
 from pathlib import Path
 
 import typer
-from alembic import command
 from alembic.config import Config
+
+from alembic import command
 
 ROOT = Path(__file__).resolve().parent
 app = typer.Typer(help="FastAPI template management commands.")
@@ -83,7 +84,6 @@ def createsuperuser():
 
 
 async def _createsuperuser():
-    from sqlalchemy.ext.asyncio import AsyncSession
 
     from core.security import hash_password
     from database.db import async_session_factory
@@ -156,7 +156,15 @@ def runworker(
             raise typer.Exit(1)
         typer.echo("Starting Celery Beat...")
         subprocess.run(
-            [sys.executable, "-m", "celery", "-A", "tasks.celery_app.celery_app", "beat", "--loglevel=info"],
+            [
+                sys.executable,
+                "-m",
+                "celery",
+                "-A",
+                "tasks.celery_app.celery_app",
+                "beat",
+                "--loglevel=info",
+            ],
             cwd=str(ROOT),
         )
         return
@@ -168,7 +176,15 @@ def runworker(
         run_forever()
     elif chosen == "celery":
         subprocess.run(
-            [sys.executable, "-m", "celery", "-A", "tasks.celery_app.celery_app", "worker", "--loglevel=info"],
+            [
+                sys.executable,
+                "-m",
+                "celery",
+                "-A",
+                "tasks.celery_app.celery_app",
+                "worker",
+                "--loglevel=info",
+            ],
             cwd=str(ROOT),
         )
     elif chosen == "arq":
@@ -220,8 +236,8 @@ def backupdb():
 
 
 async def _backupdb():
-    from database.db import async_session_factory
     from database.backup import backup as run_backup
+    from database.db import async_session_factory
 
     async with async_session_factory() as session:
         await run_backup(session)
@@ -299,8 +315,7 @@ def _createmodule(name: str) -> None:
             f"        self.repo = {class_name}Repository(db)\n"
         ),
         "schemas.py": (
-            f'"""Pydantic schemas for the {name} module."""\n\n'
-            f"from pydantic import BaseModel\n"
+            f'"""Pydantic schemas for the {name} module."""\n\nfrom pydantic import BaseModel\n'
         ),
         "repository.py": (
             f'"""Data access for the {name} module."""\n\n'
@@ -315,7 +330,51 @@ def _createmodule(name: str) -> None:
         (module_dir / fname).write_text(content, encoding="utf-8")
 
     typer.echo(f"Module '{name}' created at {module_dir.relative_to(ROOT)}")
-    typer.echo("Add routes to router.py — it will be auto-discovered on next server start.")
+    typer.echo(f"Next: create database/models/{name}.py, then run:")
+    typer.echo(f"  python manage.py generate-crud {name}")
+
+
+@app.command("generate-crud")
+def generatecrud(
+    name: str = typer.Argument(..., help="Module name (snake_case), e.g. blog"),
+    filters: bool = typer.Option(False, "--filters", help="Generate filters.py and list filtering"),
+    permissions: bool = typer.Option(
+        False, "--permissions", help="Generate permissions.py and protect routes"
+    ),
+    tests: bool = typer.Option(False, "--tests", help="Generate CRUD tests in tests/"),
+):
+    """Generate CRUD code from a SQLAlchemy model in database/models/."""
+    if not re.fullmatch(r"[a-z][a-z0-9_]*", name):
+        typer.echo(
+            f"Error: Module name '{name}' must be snake_case (e.g. blog_post).",
+            err=True,
+        )
+        raise typer.Exit(1)
+
+    from generators.crud import generate_crud
+
+    try:
+        written = generate_crud(
+            name,
+            with_filters=filters,
+            with_permissions=permissions,
+            with_tests=tests,
+        )
+    except ValueError as exc:
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(1) from exc
+
+    typer.echo(f"Generated CRUD for '{name}':")
+    seen: set[str] = set()
+    for path in written:
+        if path not in seen:
+            typer.echo(f"  [ok] {path}")
+            seen.add(path)
+
+    if permissions:
+        typer.echo("  [note] Run: python manage.py seed-data")
+    typer.echo(f'  [note] Review and run: python manage.py makemigrations -m "add {name}"')
+    typer.echo("  [ok] Router auto-discovered on next server start")
 
 
 if __name__ == "__main__":

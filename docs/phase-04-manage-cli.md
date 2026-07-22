@@ -76,6 +76,48 @@ python manage.py runworker -b arq             # force ARQ
 python manage.py runworker -b celery --beat   # Celery Beat scheduler
 ```
 
+---
+
+### `create-module`
+
+Scaffold a new feature module under `modules/`.
+
+```bash
+python manage.py create-module blog
+python manage.py create-module blog_post
+```
+
+Creates `router.py`, `service.py`, `schemas.py`, `repository.py`, and `template/`. Module name must be `snake_case`.
+
+Next step:
+
+```bash
+python manage.py generate-crud blog
+```
+
+Full details: [Phase 14 — CRUD Generator](./phase-14-crud-generator.md).
+
+---
+
+### `generate-crud`
+
+Generate CRUD code from a SQLAlchemy model in `database/models/{name}.py`.
+
+```bash
+python manage.py generate-crud blog
+python manage.py generate-crud blog --filters --permissions --tests
+```
+
+| Flag | Effect |
+|------|--------|
+| `--filters` | Search, sort, and field filters on list endpoint |
+| `--permissions` | Route guards + auto-register in `core/permissions.py` and `database/seed.py` |
+| `--tests` | `tests/test_{name}_crud.py` |
+
+After `--permissions`, run `python manage.py seed-data`. After model changes, re-run the same command to refresh generated code.
+
+Full workflow, review checklist, and architecture: [Phase 14 — CRUD Generator](./phase-14-crud-generator.md).
+
 ## Django comparison
 
 | Django | This template |
@@ -86,7 +128,9 @@ python manage.py runworker -b celery --beat   # Celery Beat scheduler
 | `createsuperuser` | `createsuperuser` |
 | `shell` | `shell` |
 | `runworker` (Celery) | `runworker -b celery` |
+| `startapp` | `create-module` |
+| Admin + serializers + views | `generate-crud` (see [Phase 14](./phase-14-crud-generator.md)) |
 
 ## Status
 
-✅ Complete — all core CLI commands implemented.
+✅ Complete — core CLI commands plus module scaffolding and CRUD generation.
